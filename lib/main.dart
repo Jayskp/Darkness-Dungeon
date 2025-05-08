@@ -1,122 +1,220 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'background_painter.dart';
+import 'constants.dart';
+import 'game_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const DarknessDungeonApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class DarknessDungeonApp extends StatelessWidget {
+  const DarknessDungeonApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final baseTheme = DungeonTheme.darkTheme;
+
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      title: 'Darkness Dungeon',
+      debugShowCheckedModeBanner: false,
+      theme: baseTheme.copyWith(
+        textTheme: TextTheme(
+          displayLarge: GoogleFonts.pressStart2p(
+            fontSize: 32,
+            color: DungeonColors.textPrimary,
+            shadows: [
+              Shadow(
+                blurRadius: 8.0,
+                color: DungeonColors.primary,
+                offset: const Offset(2.0, 2.0),
+              ),
+            ],
+          ),
+          bodyLarge: GoogleFonts.pressStart2p(
+            fontSize: 16,
+            color: DungeonColors.textSecondary,
+          ),
+          labelLarge: GoogleFonts.pressStart2p(
+            fontSize: 18,
+            color: DungeonColors.textSecondary,
+          ),
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const StartPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class StartPage extends StatefulWidget {
+  const StartPage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<StartPage> createState() => _StartPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _StartPageState extends State<StartPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _pulseAnimation;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+      backgroundColor: Colors.black,
+      body: CustomPaint(
+        painter: DungeonBackgroundPainter(),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment.center,
+              radius: 1.0,
+              colors: [
+                Colors.indigo.shade800.withOpacity(0.6),
+                Colors.black.withOpacity(0.9),
+              ],
+              stops: const [0.4, 1.0],
             ),
-          ],
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                _buildAnimatedTitle('DARKNESS', 300),
+                _buildAnimatedTitle('DUNGEON', 600),
+                const SizedBox(height: 60),
+                _buildMenuButton(context, 'START GAME', () {
+                  // Navigate to game page
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const GamePage()),
+                  );
+                }),
+                const SizedBox(height: 20),
+                _buildMenuButton(context, 'SETTINGS', () {
+                  // Open settings
+                }),
+                const SizedBox(height: 20),
+                _buildMenuButton(context, 'EXIT', () {
+                  // Exit game
+                }),
+                const SizedBox(height: 60),
+                AnimatedBuilder(
+                  animation: _pulseAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _pulseAnimation.value,
+                      child: Text(
+                        'PRESS START TO ENTER THE DARKNESS',
+                        style: GoogleFonts.pressStart2p(
+                          fontSize: 10,
+                          color: DungeonColors.textPrimary,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+
+  Widget _buildAnimatedTitle(String text, int delay) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 800),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, (1 - value) * -20),
+            child: Text(
+              text,
+              style: Theme.of(
+                context,
+              ).textTheme.displayLarge?.copyWith(letterSpacing: 2.0),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMenuButton(
+    BuildContext context,
+    String text,
+    VoidCallback onPressed,
+  ) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 400),
+        builder: (context, value, child) {
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 250,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: DungeonColors.surface,
+                minimumSize: const Size(250, 50),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 15,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  side: BorderSide(
+                    color: DungeonColors.secondary,
+                    width: 2 * value, // Animation for border thickness
+                  ),
+                ),
+                elevation: 8 * value, // Animation for elevation
+                shadowColor: DungeonColors.primary.withOpacity(0.5),
+              ),
+              child: Text(
+                text,
+                style: GoogleFonts.pressStart2p(
+                  fontSize: 14,
+                  color: DungeonColors.textPrimary,
+                  shadows: [
+                    Shadow(
+                      color: DungeonColors.primary.withOpacity(value),
+                      blurRadius: 8 * value,
+                      offset: Offset(2 * value, 2 * value),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
