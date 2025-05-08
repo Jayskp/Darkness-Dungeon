@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'game/game_screen.dart';
 import 'background_painter.dart';
 import 'constants.dart';
-import 'game_page.dart';
 
 void main() {
   runApp(const DarknessDungeonApp());
@@ -106,7 +106,7 @@ class _StartPageState extends State<StartPage>
                 _buildMenuButton(context, 'START GAME', () {
                   // Navigate to game page
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => const GamePage()),
+                    MaterialPageRoute(builder: (context) => const GameScreen()),
                   );
                 }),
                 const SizedBox(height: 20),
