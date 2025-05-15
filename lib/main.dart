@@ -1,47 +1,76 @@
+import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:developer' as developer;
+import 'game/dungeon_game.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'game/game_screen.dart';
 import 'background_painter.dart';
 import 'constants.dart';
 
 void main() {
-  runApp(const DarknessDungeonApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  developer.log('App starting');
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+  runApp(const MyApp());
 }
 
-class DarknessDungeonApp extends StatelessWidget {
-  const DarknessDungeonApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final baseTheme = DungeonTheme.darkTheme;
-
     return MaterialApp(
-      title: 'Darkness Dungeon',
+      title: 'Dungeon Adventure',
       debugShowCheckedModeBanner: false,
-      theme: baseTheme.copyWith(
-        textTheme: TextTheme(
-          displayLarge: GoogleFonts.pressStart2p(
-            fontSize: 32,
-            color: DungeonColors.textPrimary,
-            shadows: [
-              Shadow(
-                blurRadius: 8.0,
-                color: DungeonColors.primary,
-                offset: const Offset(2.0, 2.0),
-              ),
-            ],
-          ),
-          bodyLarge: GoogleFonts.pressStart2p(
-            fontSize: 16,
-            color: DungeonColors.textSecondary,
-          ),
-          labelLarge: GoogleFonts.pressStart2p(
-            fontSize: 18,
-            color: DungeonColors.textSecondary,
-          ),
-        ),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
-      home: const StartPage(),
+      home: const GameScreen(),
+    );
+  }
+}
+
+class GameScreen extends StatelessWidget {
+  const GameScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GameWidget<DungeonGame>(
+        game: DungeonGame(),
+        loadingBuilder:
+            (context) => const Center(child: CircularProgressIndicator()),
+        errorBuilder:
+            (context, error) => Center(
+              child: Text(
+                'Error: $error',
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+        overlayBuilderMap: {
+          'joystick': (_, game) {
+            try {
+              // Safely get the joystick overlay, or return an empty container if not available
+              developer.log('Getting joystick overlay');
+              final overlay = game.getJoystickOverlay();
+              developer.log(
+                'Got joystick overlay: ${overlay != null ? 'available' : 'null'}',
+              );
+              return overlay ?? Container();
+            } catch (e) {
+              developer.log('Error getting joystick overlay: $e', error: e);
+              return Container();
+            }
+          },
+        },
+        initialActiveOverlays: const ['joystick'],
+      ),
     );
   }
 }
